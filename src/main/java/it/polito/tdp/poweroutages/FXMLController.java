@@ -4,6 +4,8 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import it.polito.tdp.poweroutages.model.Model;
+import it.polito.tdp.poweroutages.model.Nerc;
+import it.polito.tdp.poweroutages.model.Vicini;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -28,7 +30,7 @@ public class FXMLController {
     private Button btnCreaGrafo;
 
     @FXML
-    private ComboBox<?> cmbBoxNerc;
+    private ComboBox<Nerc> cmbBoxNerc;
 
     @FXML
     private Button btnVisualizzaVicini;
@@ -41,19 +43,38 @@ public class FXMLController {
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
+    	
+    	txtResult.clear();
+    	model.creaGrafo();
+    	txtResult.appendText("grafo creato");
 
     }
 
     @FXML
     void doSimula(ActionEvent event) {
-
+    	
+    	try {
+    		int x = (Integer.parseInt(txtK.getText()));
+    		model.simula(x);
+    		txtResult.appendText("le catastrofi sono: "+model.getCatastrofi()+"\n"+model.getBonus());
+    	} catch(NumberFormatException e) {
+    		txtResult.appendText("inserire un numero di mesi corretto");
+    	}
+    	
     }
 
     @FXML
     void doVisualizzaVicini(ActionEvent event) {
 
+    	txtResult.clear();
+    	if(cmbBoxNerc.getValue()!=null) {
+    		for(Vicini v : model.vicini(cmbBoxNerc.getValue()))
+    			txtResult.appendText(v.toString()+"\n");
     }
-
+    	else
+    		txtResult.appendText("selezionare un nerc");
+    }
+    
     @FXML
     void initialize() {
         assert txtResult != null : "fx:id=\"txtResult\" was not injected: check your FXML file 'PowerOutages.fxml'.";
@@ -67,5 +88,6 @@ public class FXMLController {
 
 	public void setModel(Model model) {
 		this.model = model;
+		cmbBoxNerc.getItems().addAll(model.loadAllNercs());
 	}
 }
